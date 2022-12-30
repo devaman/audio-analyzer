@@ -1,0 +1,54 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+:fullscreen {
+    overflow: scroll !important;
+  }
+:-ms-fullscreen {
+  overflow: scroll !important;
+}
+:-webkit-full-screen {
+  overflow: scroll !important;
+}
+:-moz-full-screen {
+  overflow: scroll !important;
+}
+
+#container {
+    display: flex;
+    position: relative;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
+}
+#container-config {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  flex: 0 0 100%;
+}
+#container-config #fullscreen{
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+}
+#container-config #audio{
+  flex: 1;
+}
+#container-config #fullscreen:hover{
+  border: 1px solid black;
+}
+#canvas {
+    height: 500px;
+    width: 500px;
+    
+}
+.config{
+    background-color: white;
+}

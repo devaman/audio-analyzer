@@ -1,0 +1,38 @@
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="stylesheet" href="style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Audio Visualizer</title>
+  </head>
+  <body>
+      <div id="container">
+        <canvas id="canvas"></canvas>
+        <div id="container-config">
+          <audio controls id="audio">
+            Your browser does not support the audio element.
+          </audio>
+          <span id="fullscreen"><img src="/img/fullscreen.png" height="30" width="30"/></span>
+        </div>
+      </div>
+    <div class="config">
+        <div>
+            <label for="upload_audio">Upload audio / video (mp4)</label>
+            <input id="upload_audio" type="file"/>
+        </div>
+        <div>
+            <label for="upload_bg">Upload background Image/ video</label>
+            <input type="file" id="upload_bg" placeholder="bg"/>
+        </div>
+        <div>
+          <label for="upload_logo">Upload logo (256*256)</label>
+          <input type="file" id="upload_logo" placeholder="logo"/>
+        </div>
+        <div>
+          <label for="stroke_color">Select stroke color</label>
+          <input type="color" id="stroke_color">
+        </div>
+    </div>
+     
+    <script src="script.js"></script>
+  </body>
