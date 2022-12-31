@@ -1,7 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap');
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: 'Montserrat', sans-serif;
 }
 :fullscreen {
     overflow: scroll !important;
@@ -24,25 +26,25 @@
     width: 100vw;
     height: 100vh;
 }
+#container .logo_img{
+  border-radius: 50%;
+}
 #container-config {
   position: absolute;
   bottom: 0;
   width: 100%;
   display: flex;
   flex: 0 0 100%;
+  background-color: #f1f3f4;
 }
 #container-config #fullscreen{
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
-
 }
 #container-config #audio{
   flex: 1;
-}
-#container-config #fullscreen:hover{
-  border: 1px solid black;
 }
 #canvas {
     height: 500px;
@@ -51,4 +53,13 @@
 }
 .config{
     background-color: white;
+    margin-top: 8px;
+}
+.config div {
+  padding: 10px;
+  border-top: 1px solid black;
+}
+.config div label {
+  font-weight: 600;
+  display: block;
 }
