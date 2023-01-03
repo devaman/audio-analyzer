@@ -43,17 +43,17 @@ document.getElementById('upload_audio').addEventListener('change', function(e) {
         
         lowpass.type = "lowpass"
         lowpass.frequency.value = 200
-        lowpass.gain.value = -1
+        lowpass.gain.value = 1
         highpass.type = "highpass"
         highpass.frequency.value = 10
-        highpass.gain.value = -1
+        highpass.gain.value = 1
         analyser = audioCtx.createAnalyser();
         highpass.connect(analyser)
        
         analyser.fftSize = 2**14; // controls the size of the FFT. The FFT is a fast fourier transform. Basically the number of sound samples. Will be used to draw bars in the canvas
 
         // const bufferLength = analyser.frequencyBinCount; // the number of data values that dictate the number of bars in the canvas. Always exactly one half of the fft size
-        const bufferLength = 128;
+        const bufferLength = 150;
         const dataArray = new Uint8Array(bufferLength); // coverting to unsigned 8-bit integer array format because that's the format we need
     
         function animate() {
