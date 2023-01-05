@@ -1,3 +1,5 @@
+const displayType = 0 // Can be any integer from 0 - 3
+
 let canvas = null;
 let color="#222"
 OffscreenCanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
@@ -12,9 +14,10 @@ OffscreenCanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r)
     this.closePath();
     return this;
   }
-const normalize = (val, max, min) => ((val - min) / (max - min)*10); 
+const normalize = (val, max, min) => ((val - min) / (max - min)*10);
   const drawVisualizer = ({ bufferLength, dataArray }) => {
-    let radius = 128
+    // let radius = 128
+    let radius = Math.min(canvas.width,canvas.height) / 3
     // const barWidth = canvas.width / bufferLength;
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height); // clears the canvas
@@ -49,13 +52,43 @@ const normalize = (val, max, min) => ((val - min) / (max - min)*10);
     const endY = centerY + Math.sin(rads * i) * (radius + height);
     // console.log(x,y,endX,endY)
     // draw the bar
+    let width = canvas.width / bufferLength;
     ctx.strokeStyle = color;
+    ctx.fillStyle = color
     ctx.lineWidth = lineWidth;
     ctx.lineCap = "round";
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(endX, endY);
-    ctx.stroke();
+    switch (displayType) {
+      case 1:
+        if (i == 0) {
+          ctx.beginPath()
+          ctx.moveTo(endX,endY)
+        }
+        ctx.lineTo(endX,endY)
+        if (i == bufferLength - 1) {
+          ctx.fill()
+        }
+      break; case 2:
+        ctx.fillRect(i * width, 0, width, height)
+      break; case 3:
+        // let width = canvas.width / bufferLength;
+        if (i == 0) {
+          ctx.beginPath()
+          ctx.moveTo(0, 0)
+        }
+        ctx.lineTo(i * width, height)
+        if (i == bufferLength - 1) {
+          ctx.lineTo(canvas.width,0)
+          ctx.fill()
+        }
+      break; default:
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(endX, endY);
+        ctx.stroke();
+    }
+
+
+    // ctx.fillRect(i,0,3,height)
 
     // ctx.beginPath();
     // ctx.moveTo(x, y);
@@ -70,8 +103,8 @@ const normalize = (val, max, min) => ((val - min) / (max - min)*10);
 
   };
   onmessage = function (e) {
-    console.log("Worker: Message received from main script");
-    const { bufferLength, dataArray, stroke_color,logo, canvas: canvasMessage } = e.data;
+    // console.log("Worker: Message received from main script");
+    const { bufferLength, dataArray, stroke_color,logo, canvas: canvasMessage, resize_canvas } = e.data;
     if (canvasMessage) {
       canvas = canvasMessage;
     } else if(stroke_color){
@@ -81,9 +114,10 @@ const normalize = (val, max, min) => ((val - min) / (max - min)*10);
         this.createImageBitmap(logo).then(img=>{
             ctx.drawImage(img,0,0); // Or at whatever offset you like
         })
-       
+
+    } else if (resize_canvas) {
+      [canvas.width, canvas.height] = resize_canvas
     } else {
       drawVisualizer({ bufferLength, dataArray });
     }
   };
-  

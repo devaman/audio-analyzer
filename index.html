@@ -18,18 +18,19 @@
   <body>
       <div id="container">
         <canvas id="canvas"></canvas>
+        <img class="logo_img" width="256" height="256">
         <div id="container-config">
           <audio controls id="audio">
             Your browser does not support the audio element.
           </audio>
-          <span id="fullscreen"><img src="/img/fullscreen.png" height="30" width="30"/></span>
+          <span id="fullscreen"><img src="img/fullscreen.png" height="30" width="30"/></span>
         </div>
       </div>
     <div class="config">
         <h1>Configure the Audio Board</h1>
         <div>
-            <label for="upload_audio">Upload audio / video</label>
-            <input id="upload_audio" type="file"/>
+            <label for="upload_audio">Mic Audio</label>
+            <button id="upload_audio">Start</button>
         </div>
         <div>
             <label for="upload_bg">Upload background Image/ video</label>
@@ -44,6 +45,6 @@
           <input type="color" id="stroke_color">
         </div>
     </div>
-     
+
     <script src="script.js"></script>
   </body>
