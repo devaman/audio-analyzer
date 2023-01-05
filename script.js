@@ -13,7 +13,8 @@ var defaultState= {
     color: '#000',
     displayType: 0,
     bufferLength: 128,
-    fftSize: 2**14
+    fftSize: 2**14,
+    beatDetection: false
 }
 var config= {...defaultState}
 document.getElementById('upload_audio').addEventListener('change', function(e) {
@@ -226,6 +227,11 @@ function setBufferLength(event){
     let val = event.target.value
     defaultState.bufferLength = parseInt(val)
     config.bufferLength = parseInt(val)
+}
+function setBeatDetection(event){
+    let val = event.target.value
+    defaultState.beatDetection = Boolean(val)
+    config.beatDetection = Boolean(val)
 }
 
 //utility

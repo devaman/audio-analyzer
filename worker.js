@@ -1,18 +1,24 @@
 let canvas = null;
 // const displayType = 0 // Can be any integer from 0 - 3
 // let color="#222"
-const normalize = (val, max, min) => ((val - min) / (max - min)*10); 
+const normalize = (val, threshold=200) => ((val > threshold) ? val - threshold : 0);
   const drawVisualizer = ({ bufferLength, dataArray, config }) => {
     // let radius = 128
     let radius = Math.min(config.width,config.height) / 2
     // const barWidth = canvas.width / bufferLength;
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height); // clears the canvas
+    let threshold = 0
+    if(config.beatDetection) {
+      let max = Math.max(...dataArray.slice(0,bufferLength))
+      let min = Math.min(...dataArray.slice(0,bufferLength))
+      threshold = min + (max - min) * 0.68;
+    }
     // ctx.translate(250, 250)
     // ctx.translate(canvas.width / 2, canvas.height / 2)
     for (var i = 0; i < bufferLength; i++) {
         // const height =normalize(dataArray[i],100,0)
-        const height = (dataArray[i] *0.4)
+        const height = config.beatDetection ? normalize(dataArray[i], threshold):(dataArray[i] *0.4)
         // -i>0?(dataArray[i] *0.4)-i:(dataArray[i] *0.4)
 
         drawLine(
