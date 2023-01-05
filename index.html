@@ -43,6 +43,30 @@
           <label for="stroke_color">Select stroke color</label>
           <input type="color" id="stroke_color">
         </div>
+        <div>
+          <label for="stroke_color">Radius</label>
+          <input type="number" value="128" onchange="radiusChange(event);">
+        </div>
+        <div>
+          <label for="stroke_color">Display Template</label>
+          <select onchange="displayChange(event);">
+            <option selected="selected" value="0">Type 0</option>
+            <option value="1">Type 1</option>
+            <option value="2">Type 2</option>
+            <option value="3">Type 3</option>
+
+          </select>
+        </div>
+        <br>
+        <h3>Below config will be set after re-uploading of audio</h3>
+        <div>
+          <label for="stroke_color">FFT size( power of 2 (between 2^5-2^15))</label>
+          <input type="number" value="16384" onchange="setFFTSize(event);">
+        </div>
+        <div>
+          <label for="stroke_color">BufferLength(min than fftsize)</label>
+          <input type="number" value="128" onchange="setBufferLength(event);">
+        </div>
     </div>
      
     <script src="script.js"></script>

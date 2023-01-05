@@ -1,20 +1,10 @@
 let canvas = null;
-let color="#222"
-OffscreenCanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
-    if (w < 2 * r) r = w / 2;
-    if (h < 2 * r) r = h / 2;
-    this.beginPath();
-    this.moveTo(x+r, y);
-    this.arcTo(x+w, y,   x+w, y+h, r);
-    this.arcTo(x+w, y+h, x,   y+h, 0);
-    this.arcTo(x,   y+h, x,   y,   0);
-    this.arcTo(x,   y,   x+w, y,   r);
-    this.closePath();
-    return this;
-  }
+// const displayType = 0 // Can be any integer from 0 - 3
+// let color="#222"
 const normalize = (val, max, min) => ((val - min) / (max - min)*10); 
-  const drawVisualizer = ({ bufferLength, dataArray }) => {
-    let radius = 128
+  const drawVisualizer = ({ bufferLength, dataArray, config }) => {
+    // let radius = 128
+    let radius = Math.min(config.width,config.height) / 2
     // const barWidth = canvas.width / bufferLength;
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height); // clears the canvas
@@ -30,14 +20,15 @@ const normalize = (val, max, min) => ((val - min) / (max - min)*10);
             i,
             bufferLength,
             height,
-            radius
+            radius,
+            config
           },
           ctx
         );
       }
   };
   const drawLine = (opts, ctx) => {
-    const { i, radius, bufferLength, height } = opts;
+    const { i, radius, bufferLength, height, config } = opts;
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
     const lineWidth = 2 * Math.PI * radius / bufferLength;
@@ -47,43 +38,52 @@ const normalize = (val, max, min) => ((val - min) / (max - min)*10);
     const y = centerY + Math.sin(rads * i) * (radius);
     const endX = centerX + Math.cos(rads * i) * (radius + height);
     const endY = centerY + Math.sin(rads * i) * (radius + height);
-    // console.log(x,y,endX,endY)
-    // draw the bar
-    ctx.strokeStyle = color;
+    let width = canvas.width / bufferLength;
+    ctx.strokeStyle = config.color;
+    ctx.fillStyle = config.color
     ctx.lineWidth = lineWidth;
     ctx.lineCap = "round";
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(endX, endY);
-    ctx.stroke();
-
-    // ctx.beginPath();
-    // ctx.moveTo(x, y);
-    // ctx.arcTo(x+endX, y,   x+endX, y+endY, 2);
-    // ctx.arcTo(x+endX, y+endY, x,   y+endY, 0);
-    // ctx.arcTo(x,   y+endY, x,   y,   0);
-    // ctx.arcTo(x,   y,   x+endX, y,   2);
-    // ctx.stroke()
-    // ctx.roundRect(x,y,endX,endY).fill()
-    // ctx.fillStyle = 'white'
-    // ctx.fillRect(x, y, endX+lineWidth, endY);
+    switch (config.displayType) {
+      case 1:
+        if (i == 0) {
+          ctx.beginPath()
+          ctx.moveTo(endX,endY)
+        }
+        ctx.lineTo(endX,endY)
+        if (i == bufferLength - 1) {
+          ctx.fill()
+        }
+      break; case 2:
+        // let width = canvas.width / bufferLength;
+        ctx.fillRect(i * width, 0, width, height)
+      break; case 3:
+        // let width = canvas.width / bufferLength;
+        if (i == 0) {
+          ctx.beginPath()
+          ctx.moveTo(0, 0)
+        }
+        ctx.lineTo(i * width, height)
+        if (i == bufferLength - 1) {
+          ctx.lineTo(canvas.width,0)
+          ctx.fill()
+        }
+      break; default:
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(endX, endY);
+        ctx.stroke();
+    }
 
   };
   onmessage = function (e) {
     console.log("Worker: Message received from main script");
-    const { bufferLength, dataArray, stroke_color,logo, canvas: canvasMessage } = e.data;
+    const { bufferLength, dataArray, config, canvas: canvasMessage, resize_canvas } = e.data;
     if (canvasMessage) {
       canvas = canvasMessage;
-    } else if(stroke_color){
-        color=stroke_color
-    } else if(logo){
-        const ctx = canvas.getContext("2d");
-        this.createImageBitmap(logo).then(img=>{
-            ctx.drawImage(img,0,0); // Or at whatever offset you like
-        })
-       
-    } else {
-      drawVisualizer({ bufferLength, dataArray });
+    } else if (resize_canvas) {
+      [canvas.width, canvas.height] = resize_canvas
+    }  else {
+      drawVisualizer({ bufferLength, dataArray, config });
     }
   };
   

@@ -5,8 +5,17 @@ var worker;
 var canvas = document.getElementById("canvas").transferControlToOffscreen();
 var audioEl = document.getElementById('audio') 
 var container = document.getElementById('container')
-canvas.width = 500;
-canvas.height = 500;
+canvas.width = window.innerWidth
+canvas.height = window.innerHeight
+var defaultState= {
+    height: 256,
+    width: 256,
+    color: '#000',
+    displayType: 0,
+    bufferLength: 128,
+    fftSize: 2**14
+}
+var config= {...defaultState}
 document.getElementById('upload_audio').addEventListener('change', function(e) {
     var file = this.files[0]
     var reader = new FileReader();
@@ -50,15 +59,15 @@ document.getElementById('upload_audio').addEventListener('change', function(e) {
         analyser = audioCtx.createAnalyser();
         highpass.connect(analyser)
        
-        analyser.fftSize = 2**14; // controls the size of the FFT. The FFT is a fast fourier transform. Basically the number of sound samples. Will be used to draw bars in the canvas
+        analyser.fftSize = defaultState.fftSize // controls the size of the FFT. The FFT is a fast fourier transform. Basically the number of sound samples. Will be used to draw bars in the canvas
 
         // const bufferLength = analyser.frequencyBinCount; // the number of data values that dictate the number of bars in the canvas. Always exactly one half of the fft size
-        const bufferLength = 128;
+        const bufferLength = defaultState.bufferLength;
         const dataArray = new Uint8Array(bufferLength); // coverting to unsigned 8-bit integer array format because that's the format we need
     
         function animate() {
         analyser.getByteFrequencyData(dataArray); // copies the frequency data into the dataArray in place. Each item contains a number between 0 and 255
-        worker.postMessage({ bufferLength, dataArray }, {});
+        worker.postMessage({ bufferLength, dataArray, config }, {});
         requestAnimationFrame(animate); // calls the animate function again. This method is built in
         }
     
@@ -76,7 +85,7 @@ document.getElementById('upload_bg').addEventListener('change', function(e) {
     reader.onload = function(evt) {
         url = evt.target.result;
         if(file.type.startsWith('image')){
-            container.style = `background-image: url(${url}); background-repeat:no-repeat;background-size:contain;`
+            container.style = `background-image: url(${url}); background-repeat:no-repeat;background-size:contain;background-position:center;`
         } else {
             let videoBlob = new Blob([new Uint8Array(url)], { type: file.type });// The blob gives us a URL to the video file:
             url = window.URL.createObjectURL(videoBlob);
@@ -125,7 +134,7 @@ document.getElementById('upload_logo').addEventListener('change', function(e) {
 })
 document.getElementById('stroke_color').addEventListener('change', function(e) {
     var stroke_color = e.target.value
-    worker.postMessage({ stroke_color }, {});
+    config.color = stroke_color
 })
 document.addEventListener("keydown", (e) => {
     if (e.key === " ") {
@@ -196,6 +205,29 @@ function toggleFullScreen(e) {
         requestFullScreen(el);
     }
 }
+function displayChange(event){
+    let val = event.target.value
+    defaultState.displayType = parseInt(val)
+    config.displayType = parseInt(val)
+}
+function radiusChange(event){
+    let val = event.target.value
+    defaultState.height = val*2
+    defaultState.width = val*2
+    config.width = defaultState.width>window.innerWidth ?window.innerWidth: defaultState.width
+    config.height =  defaultState.height>window.innerHeight ?window.innerHeight: defaultState.height
+}
+function setFFTSize(event){
+    let val = event.target.value
+    defaultState.fftSize = parseInt(val)
+    config.fftSize = parseInt(val)
+}
+function setBufferLength(event){
+    let val = event.target.value
+    defaultState.bufferLength = parseInt(val)
+    config.bufferLength = parseInt(val)
+}
+
 //utility
 function convertAudioBufferToBlob(audioBuffer) {
 // Float32Array samples
@@ -285,3 +317,12 @@ function getWavBytes(buffer, options) {
   
     return new Uint8Array(buffer)
   }
+  window.addEventListener('resize', () => {
+    if (worker) {
+        console.log('resize')
+        config.width = defaultState.width>window.innerWidth ?window.innerWidth: defaultState.width
+        config.height =  defaultState.height>window.innerHeight ?window.innerHeight: defaultState.height
+        let resize_canvas = [window.innerWidth, window.innerHeight]
+        worker.postMessage({ resize_canvas })
+    }
+  })

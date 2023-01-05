@@ -46,11 +46,6 @@
 #container-config #audio{
   flex: 1;
 }
-#canvas {
-    height: 500px;
-    width: 500px;
-    
-}
 .config{
     background-color: white;
     margin-top: 8px;
