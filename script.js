@@ -5,6 +5,7 @@ var worker;
 var canvas = document.getElementById("canvas").transferControlToOffscreen();
 var audioEl = document.getElementById('audio') 
 var container = document.getElementById('container')
+var local_stream= null
 canvas.width = window.innerWidth
 canvas.height = window.innerHeight
 var defaultState= {
@@ -16,68 +17,112 @@ var defaultState= {
     fftSize: 2**14,
     beatDetection: false
 }
+if (!navigator.getUserMedia)
+navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||
+              navigator.mozGetUserMedia || navigator.msGetUserMedia;
+
 var config= {...defaultState}
-document.getElementById('upload_audio').addEventListener('change', function(e) {
-    var file = this.files[0]
-    var reader = new FileReader();
-    reader.onload = async function(evt) {
-        url = evt.target.result;
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)(); // for safari browser // I need to explain the browser restrictions & CORS issues here
-        // let origblob = new Blob(, { type: file.type });// The blob gives us a URL to the video file:
-        // var arrayBuffer = await new Response(origblob).arrayBuffer();
-        var audioBuffer = await audioCtx.decodeAudioData(url);
-        let audioBlob = convertAudioBufferToBlob(audioBuffer)// The blob gives us a URL to the video file:
-        url = window.URL.createObjectURL(audioBlob);
-        audioEl.pause()
-        audioEl.src = url
-  
-        if(!worker){
-            worker = new Worker(new URL("./worker.js", window.location));
-            worker.postMessage({ canvas }, [canvas]);
-        }
+function upload_audio(e, file=false) {
+    console.log(file)
+    if(file) {
+        var file = e.target.files[0]
+        var reader = new FileReader();
+        if(local_stream) local_stream.getAudioTracks()[0].enabled = false;
+        reader.onload = async function(evt) {
+            url = evt.target.result;
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)(); // for safari browser // I need to explain the browser restrictions & CORS issues here
+            // let origblob = new Blob(, { type: file.type });// The blob gives us a URL to the video file:
+            // var arrayBuffer = await new Response(origblob).arrayBuffer();
+            let audioBuffer = await audioCtx.decodeAudioData(url);
+            let audioBlob = convertAudioBufferToBlob(audioBuffer)// The blob gives us a URL to the video file:
+            url = window.URL.createObjectURL(audioBlob);
+            audioEl.pause()
+            audioEl.src = url
+      
+            if(!worker){
+                worker = new Worker(new URL("./worker.js", window.location));
+                worker.postMessage({ canvas }, [canvas]);
+            }
+            
+            let analyser = null;
+            let filter = audioCtx.createBiquadFilter();// creates an filter node from the audio source
+            filter.type = 'highshelf'
+            filter.gain.value = 10
+            filter.frequency.value = 400;
+    
+            // var gainNode = audioCtx.createGain()
+            let lowpass = audioCtx.createBiquadFilter()
+            let highpass = audioCtx.createBiquadFilter()
+    
+            let source = audioCtx.createMediaElementSource(audioEl)
+            source.connect(lowpass)
+            lowpass.connect(highpass)
+            source.connect(audioCtx.destination)
+            
+            lowpass.type = "lowpass"
+            lowpass.frequency.value = 200
+            lowpass.gain.value = -1
+            highpass.type = "highpass"
+            highpass.frequency.value = 10
+            highpass.gain.value = -1
+            analyser = audioCtx.createAnalyser();
+            highpass.connect(analyser)
+           
+            analyser.fftSize = defaultState.fftSize // controls the size of the FFT. The FFT is a fast fourier transform. Basically the number of sound samples. Will be used to draw bars in the canvas
+    
+            // const bufferLength = analyser.frequencyBinCount; // the number of data values that dictate the number of bars in the canvas. Always exactly one half of the fft size
+            const bufferLength = defaultState.bufferLength;
+            const dataArray = new Uint8Array(bufferLength); // coverting to unsigned 8-bit integer array format because that's the format we need
         
-        let analyser = null;
-        const filter = audioCtx.createBiquadFilter();// creates an filter node from the audio source
-        filter.type = 'highshelf'
-        filter.gain.value = 10
-        filter.frequency.value = 400;
-
-        // var gainNode = audioCtx.createGain()
-        var lowpass = audioCtx.createBiquadFilter()
-        var highpass = audioCtx.createBiquadFilter()
-
-        source = audioCtx.createMediaElementSource(audioEl)
-        source.connect(lowpass)
-        lowpass.connect(highpass)
-        source.connect(audioCtx.destination)
+            function animate() {
+            analyser.getByteFrequencyData(dataArray); // copies the frequency data into the dataArray in place. Each item contains a number between 0 and 255
+            worker.postMessage({ bufferLength, dataArray, config }, {});
+            requestAnimationFrame(animate); // calls the animate function again. This method is built in
+            }
         
-        lowpass.type = "lowpass"
-        lowpass.frequency.value = 200
-        lowpass.gain.value = -1
-        highpass.type = "highpass"
-        highpass.frequency.value = 10
-        highpass.gain.value = -1
-        analyser = audioCtx.createAnalyser();
-        highpass.connect(analyser)
+            animate();
+           
+        };
+        reader.readAsArrayBuffer(file);
+    }
+    else {
        
-        analyser.fftSize = defaultState.fftSize // controls the size of the FFT. The FFT is a fast fourier transform. Basically the number of sound samples. Will be used to draw bars in the canvas
-
-        // const bufferLength = analyser.frequencyBinCount; // the number of data values that dictate the number of bars in the canvas. Always exactly one half of the fft size
-        const bufferLength = defaultState.bufferLength;
-        const dataArray = new Uint8Array(bufferLength); // coverting to unsigned 8-bit integer array format because that's the format we need
+        if (navigator.getUserMedia){
+            // local_stream.getAudioTracks()[0].enabled = true;
+            navigator.getUserMedia({audio:true}, async function(stream){
+                local_stream = stream
+                url = stream
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)(); // for safari browser // I need to explain the browser restrictions & CORS issues here
+                if(!worker){
+                    worker = new Worker(new URL("./worker.js", window.location));
+                    worker.postMessage({ canvas }, [canvas]);
+                }
+                audioEl.src= ''
+                let analyser = null;
+                let source = audioCtx.createMediaStreamSource(url)
     
-        function animate() {
-        analyser.getByteFrequencyData(dataArray); // copies the frequency data into the dataArray in place. Each item contains a number between 0 and 255
-        worker.postMessage({ bufferLength, dataArray, config }, {});
-        requestAnimationFrame(animate); // calls the animate function again. This method is built in
+                analyser = audioCtx.createAnalyser();
+                source.connect(analyser)
+                
+                analyser.fftSize = defaultState.fftSize // controls the size of the FFT. The FFT is a fast fourier transform. Basically the number of sound samples. Will be used to draw bars in the canvas
+    
+                const bufferLength = defaultState.bufferLength;
+                const dataArray = new Uint8Array(bufferLength); // coverting to unsigned 8-bit integer array format because that's the format we need
+    
+                function animate() {
+                analyser.getByteFrequencyData(dataArray); // copies the frequency data into the dataArray in place. Each item contains a number between 0 and 255
+                worker.postMessage({ bufferLength, dataArray, config }, {});
+                requestAnimationFrame(animate); // calls the animate function again. This method is built in
+                }
+    
+                animate();
+            },function(e) {
+                alert('Error capturing audio.');
+              })
         }
+    }
     
-        animate();
-       
-    };
-    reader.readAsArrayBuffer(file);
-    
-  });
+}
   
 /*basic*/
 document.getElementById('upload_bg').addEventListener('change', function(e) {

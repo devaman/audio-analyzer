@@ -29,7 +29,9 @@
         <h1>Configure the Audio Board</h1>
         <div>
             <label for="upload_audio">Upload audio / video</label>
-            <input id="upload_audio" type="file"/>
+            <input id="upload_audio" onchange="upload_audio(event,true);" type="file"/>
+            OR
+            <button onclick="upload_audio(event);">Mic Audio</button>
         </div>
         <div>
             <label for="upload_bg">Upload background Image/ video</label>
