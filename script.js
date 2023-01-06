@@ -6,16 +6,17 @@ var canvas = document.getElementById("canvas").transferControlToOffscreen();
 var audioEl = document.getElementById('audio') 
 var container = document.getElementById('container')
 var local_stream= null
+
 canvas.width = window.innerWidth
 canvas.height = window.innerHeight
 var defaultState= {
     height: 256,
     width: 256,
-    color: '#000',
+    color: '#000000',
     displayType: 0,
     bufferLength: 128,
     fftSize: 2**14,
-    beatDetection: false
+    beatDetection: false,
 }
 if (!navigator.getUserMedia)
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||
@@ -374,6 +375,8 @@ function getWavBytes(buffer, options) {
         config.width = defaultState.width>window.innerWidth ?window.innerWidth: defaultState.width
         config.height =  defaultState.height>window.innerHeight ?window.innerHeight: defaultState.height
         let resize_canvas = [window.innerWidth, window.innerHeight]
+        maxDistributionX = window.innerWidth / 8;
+        maxDistributionY = window.innerHeight / 4;
         worker.postMessage({ resize_canvas })
     }
   })
