@@ -19,6 +19,7 @@
 }
 :root {
   overflow-x: hidden;
+  width: 100vw;
 }
 #container {
     display: flex;
@@ -51,8 +52,10 @@
 .config{
     background-color: white;
     margin-top: 8px;
+    padding: 5px;
 }
 .config div {
+  left: 10px;
   padding: 10px;
   border-top: 1px solid black;
 }
