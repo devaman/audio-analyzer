@@ -36,7 +36,7 @@ document.getElementById('upload_audio').addEventListener('click', function(e) {
 
             analyser.fftSize = 2**12; // controls the size of the FFT. The FFT is a fast fourier transform. Basically the number of sound samples. Will be used to draw bars in the canvas
 
-            const bufferLength = 128;
+            const bufferLength = 256;
             const dataArray = new Uint8Array(bufferLength); // coverting to unsigned 8-bit integer array format because that's the format we need
 
             function animate() {
@@ -110,6 +110,10 @@ document.getElementById('upload_logo').addEventListener('change', function(e) {
 document.getElementById('stroke_color').addEventListener('change', function(e) {
     var stroke_color = e.target.value
     worker.postMessage({ stroke_color }, {});
+})
+document.getElementById('display_num').addEventListener('change', function(e) {
+  var display_num = e.target.value
+  worker.postMessage({ display_num }, {})
 })
 document.addEventListener("keydown", (e) => {
     if (e.key === " ") {
@@ -188,8 +192,8 @@ function convertAudioBufferToBlob(audioBuffer) {
     // interleaved
     const interleaved = new Float32Array(left.length + right.length)
     for (let src=0, dst=0; src < left.length; src++, dst+=2) {
-    interleaved[dst] =   left[src]
-    interleaved[dst+1] = right[src]
+      interleaved[dst] =   left[src]
+      interleaved[dst+1] = right[src]
     }
 
     // get WAV file bytes and audio params of your audio source
