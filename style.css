@@ -17,7 +17,9 @@
 :-moz-full-screen {
   overflow: scroll !important;
 }
-
+:root {
+  overflow-x: hidden;
+}
 #container {
     display: flex;
     position: relative;
@@ -46,12 +48,6 @@
 #container-config #audio{
   flex: 1;
 }
-/* #canvas {
-    height: 500px;
-    width: 500px;
-    height: 90vh;
-    width: 90vw;
-} */
 .config{
     background-color: white;
     margin-top: 8px;
@@ -63,14 +59,4 @@
 .config div label {
   font-weight: 600;
   display: block;
-}
-
-img:not([src]) {
-  opacity: 0;
-}
-.logo_img {
-  position: absolute;
-}
-body {
-  overflow-x: hidden; /* Get rid of the scroll bar at the bottom */
 }
