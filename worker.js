@@ -106,7 +106,7 @@ const drawStars = ({ bufferLength, dataArray, config })=>{
   let max = Math.max(...dataArray.slice(0,bufferLength/3))
   let min = Math.min(...dataArray.slice(0,bufferLength/3))
   threshold = min + (max - min) * 0.68;
-  let speed = normalize1(max,255,0)/4;
+  let speed = config.bounce;
   speed = speed>0.05?speed:0.05
   // .3 or .5 looks good, 1 for no shade
   // context.fillStyle = 'rgba(0, 34, 34, .5)';

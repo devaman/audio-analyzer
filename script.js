@@ -6,6 +6,7 @@ var canvas = document.getElementById("canvas").transferControlToOffscreen();
 var audioEl = document.getElementById('audio') 
 var container = document.getElementById('container')
 var local_stream= null
+const normalize = (val, threshold=200) => ((val > threshold) ? val - threshold : 0);
 const normalize1 = (val, max, min) => ((val-min)/(max-min))
 canvas.width = window.innerWidth
 canvas.height = window.innerHeight
@@ -18,6 +19,7 @@ var defaultState= {
     fftSize: 2**14,
     bounceMultiplier: 50,
     beatDetection: false,
+    bounce: 0
 }
 if (!navigator.getUserMedia)
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||
@@ -25,7 +27,6 @@ navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia 
 
 var config= {...defaultState}
 function upload_audio(e, file=false) {
-    console.log(file)
     if(file) {
         var file = e.target.files[0]
         var reader = new FileReader();
@@ -79,13 +80,19 @@ function upload_audio(e, file=false) {
             function animate() {
                 analyser.getByteFrequencyData(dataArray); // copies the frequency data into the dataArray in place. Each item contains a number between 0 and 255
                 const setBounce = ()=>{
-                    let max = Math.max(...dataArray.slice(0,config.bufferLength/3))
-                    let min = Math.min(...dataArray.slice(0,config.bufferLength/3))
-                    let bounce =normalize1( min + (max - min) * 0.7,255,0);
+                    let bassArr = dataArray.slice(0,config.bufferLength)
+                    let max = Math.max(...bassArr)
+                    let min = Math.min(...bassArr)
+                    let threshold2 = min+ (max-min)*0.7
+                    let newNorm = bassArr.map(val=>normalize(val, threshold2))
+                    let threshold1 = newNorm.reduce((acc,crr)=>acc+crr/bassArr.length,0)
+                    let bounce =threshold1 * 0.01
+                    console.log(bounce, threshold1,)
                     let bounced =defaultState.radius + bounce*defaultState.bounceMultiplier
                     let height =bounced*2>window.innerHeight ?window.innerHeight/2:bounced
                     let width =bounced*2>window.innerWidth ?window.innerWidth/2:bounced
                     config.radius = Math.min(height,width)
+                    config.bounce = bounce
                     let logoExists = container.querySelector('.logo_img')
                     if(logoExists) {
 
@@ -135,6 +142,7 @@ function upload_audio(e, file=false) {
                     let height =bounced*2>window.innerHeight ?window.innerHeight/2:bounced
                     let width =bounced*2>window.innerWidth ?window.innerWidth/2:bounced
                     config.radius = Math.min(height,width)
+                    config.bounce = bounce
                     let logoExists = container.querySelector('.logo_img')
                     if(logoExists) {
 
