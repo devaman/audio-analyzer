@@ -17,7 +17,7 @@ var defaultState= {
     displayType: 0,
     bufferLength: 128,
     fftSize: 2**14,
-    bounceMultiplier: 50,
+    bounceMultiplier: 300,
     beatDetection: false,
     bounce: 0
 }
