@@ -22,7 +22,7 @@
           <audio controls id="audio">
             Your browser does not support the audio element.
           </audio>
-          <span id="fullscreen"><img src="img/fullscreen.png" height="30" width="30"/></span>
+          <span id="fullscreen"><img src="/img/fullscreen.png" height="30" width="30"/></span>
         </div>
       </div>
     <div class="config">
@@ -43,7 +43,7 @@
         </div>
         <div>
           <label for="stroke_color">Select stroke color</label>
-          <input type="color" id="stroke_color">
+          <input type="color" id="stroke_color" value="#000000">
         </div>
         <div>
           <label for="stroke_color">Radius</label>
@@ -73,6 +73,17 @@
             <option value="true">True</option>
           </select>
         </div>
+        <div>
+          <label for="stroke_color">Bounce Multiplier (1-100)</label>
+          <input type="number" value="50" onchange="setBounceMultiplier(event);">
+        </div>
+        <div>
+          <label for="stroke_color">Show Particles</label>
+          <select onchange="setShowParticles(event);">
+            <option selected="selected" value="true">True</option>
+            <option value="false">False</option>
+          </select>
+        </div>
         <br>
         <h3>Below config will be set after re-uploading of audio</h3>
         <div>
@@ -84,6 +95,6 @@
           <input type="number" value="128" onchange="setBufferLength(event);">
         </div>
     </div>
-
+     
     <script src="script.js"></script>
   </body>

@@ -6,16 +6,20 @@ var canvas = document.getElementById("canvas").transferControlToOffscreen();
 var audioEl = document.getElementById('audio') 
 var container = document.getElementById('container')
 var local_stream= null
+const normalize = (val, threshold=200) => ((val > threshold) ? val - threshold : 0);
+const normalize1 = (val, max, min) => ((val-min)/(max-min))
 canvas.width = window.innerWidth
 canvas.height = window.innerHeight
 var defaultState= {
-    height: 256,
-    width: 256,
-    color: '#000',
+    radius: 128,
+    color: '#000000',
+    showParticles: true,
     displayType: 0,
     bufferLength: 128,
     fftSize: 2**14,
-    beatDetection: false
+    bounceMultiplier: 50,
+    beatDetection: false,
+    bounce: 0
 }
 if (!navigator.getUserMedia)
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||
@@ -23,7 +27,6 @@ navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia 
 
 var config= {...defaultState}
 function upload_audio(e, file=false) {
-    console.log(file)
     if(file) {
         var file = e.target.files[0]
         var reader = new FileReader();
@@ -75,11 +78,32 @@ function upload_audio(e, file=false) {
             const dataArray = new Uint8Array(bufferLength); // coverting to unsigned 8-bit integer array format because that's the format we need
         
             function animate() {
-            analyser.getByteFrequencyData(dataArray); // copies the frequency data into the dataArray in place. Each item contains a number between 0 and 255
+                analyser.getByteFrequencyData(dataArray); // copies the frequency data into the dataArray in place. Each item contains a number between 0 and 255
+                const setBounce = ()=>{
+                    let bassArr = dataArray.slice(0,config.bufferLength)
+                    let max = Math.max(...bassArr)
+                    let min = Math.min(...bassArr)
+                    let threshold2 = min+ (max-min)*0.7
+                    let newNorm = bassArr.map(val=>normalize(val, threshold2))
+                    let threshold1 = newNorm.reduce((acc,crr)=>acc+crr/bassArr.length,0)
+                    let bounce =threshold1 * 0.01
+                    console.log(bounce, threshold1,)
+                    let bounced =defaultState.radius + bounce*defaultState.bounceMultiplier
+                    let height =bounced*2>window.innerHeight ?window.innerHeight/2:bounced
+                    let width =bounced*2>window.innerWidth ?window.innerWidth/2:bounced
+                    config.radius = Math.min(height,width)
+                    config.bounce = bounce
+                    let logoExists = container.querySelector('.logo_img')
+                    if(logoExists) {
+
+                        logoExists.height = config.radius *2
+                        logoExists.width = config.radius*2
+                    }
+                }
+                setBounce()
             worker.postMessage({ bufferLength, dataArray, config }, {});
             requestAnimationFrame(animate); // calls the animate function again. This method is built in
             }
-        
             animate();
            
         };
@@ -110,7 +134,23 @@ function upload_audio(e, file=false) {
                 const dataArray = new Uint8Array(bufferLength); // coverting to unsigned 8-bit integer array format because that's the format we need
     
                 function animate() {
-                analyser.getByteFrequencyData(dataArray); // copies the frequency data into the dataArray in place. Each item contains a number between 0 and 255
+                analyser.getByteFrequencyData(dataArray);
+                const setBounce = ()=>{
+                    let max = Math.max(...dataArray.slice(0,config.bufferLength/2))
+                    let bounce =normalize1(max,255,0);
+                    let bounced =defaultState.radius + bounce*defaultState.bounceMultiplier
+                    let height =bounced*2>window.innerHeight ?window.innerHeight/2:bounced
+                    let width =bounced*2>window.innerWidth ?window.innerWidth/2:bounced
+                    config.radius = Math.min(height,width)
+                    config.bounce = bounce
+                    let logoExists = container.querySelector('.logo_img')
+                    if(logoExists) {
+
+                        logoExists.height = config.radius *2
+                        logoExists.width = config.radius*2
+                    }
+                }
+                setBounce()
                 worker.postMessage({ bufferLength, dataArray, config }, {});
                 requestAnimationFrame(animate); // calls the animate function again. This method is built in
                 }
@@ -165,8 +205,8 @@ document.getElementById('upload_logo').addEventListener('change', function(e) {
         url = evt.target.result;
         const logo_img = document.createElement('img')
         logo_img.src = url;
-        logo_img.width=256
-        logo_img.height=256
+        logo_img.width=config.radius * 2
+        logo_img.height=config.radius * 2
         logo_img.classList.add('logo_img')
         logo_img.style = 'position:absolute;'
         let logoExists = container.querySelector('.logo_img')
@@ -258,10 +298,15 @@ function displayChange(event){
 }
 function radiusChange(event){
     let val = event.target.value
-    defaultState.height = val*2
-    defaultState.width = val*2
-    config.width = defaultState.width>window.innerWidth ?window.innerWidth: defaultState.width
-    config.height =  defaultState.height>window.innerHeight ?window.innerHeight: defaultState.height
+    let logoExists = container.querySelector('.logo_img')
+    let width = val*2>window.innerWidth ?window.innerWidth/2: val
+    let height =  val*2>window.innerHeight ?window.innerHeight/2: val
+    defaultState.radius = Math.min(height,width)
+    if(logoExists) {
+        logoExists.height = defaultState.radius *2
+        logoExists.width = defaultState.radius * 2
+    }
+
 }
 function setFFTSize(event){
     let val = event.target.value
@@ -274,9 +319,20 @@ function setBufferLength(event){
     config.bufferLength = parseInt(val)
 }
 function setBeatDetection(event){
-    let val = event.target.value
+    let val = event.target.value === 'true'
     defaultState.beatDetection = Boolean(val)
     config.beatDetection = Boolean(val)
+}
+function setBounceMultiplier(event){
+    let val = event.target.value
+    defaultState.bounceMultiplier = parseInt(val)
+    config.bounceMultiplier = parseInt(val)
+}
+function setShowParticles(event){
+    let val = event.target.value === 'true'
+    defaultState.showParticles = val
+    config.showParticles = val
+    console.log('changed', defaultState, config, val)
 }
 
 //utility
@@ -371,9 +427,12 @@ function getWavBytes(buffer, options) {
   window.addEventListener('resize', () => {
     if (worker) {
         console.log('resize')
-        config.width = defaultState.width>window.innerWidth ?window.innerWidth: defaultState.width
-        config.height =  defaultState.height>window.innerHeight ?window.innerHeight: defaultState.height
+        let height = defaultState.radius*2>window.innerHeight ?window.innerHeight/2: defaultState.radius
+        let width = defaultState.radius*2>window.innerWidth ?window.innerWidth/2: defaultState.radius
+        config.radius = Math.min(height,width)
         let resize_canvas = [window.innerWidth, window.innerHeight]
+        maxDistributionX = window.innerWidth / 8;
+        maxDistributionY = window.innerHeight / 4;
         worker.postMessage({ resize_canvas })
     }
   })

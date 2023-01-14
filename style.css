@@ -17,10 +17,7 @@
 :-moz-full-screen {
   overflow: scroll !important;
 }
-:root {
-  overflow-x: hidden;
-  width: 100vw;
-}
+
 #container {
     display: flex;
     position: relative;
@@ -35,7 +32,7 @@
 #container-config {
   position: absolute;
   bottom: 0;
-  width: 90%;
+  width: 100%;
   display: flex;
   flex: 0 0 100%;
   background-color: #f1f3f4;
@@ -52,10 +49,8 @@
 .config{
     background-color: white;
     margin-top: 8px;
-    padding: 5px;
 }
 .config div {
-  left: 10px;
   padding: 10px;
   border-top: 1px solid black;
 }
