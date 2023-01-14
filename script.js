@@ -87,7 +87,6 @@ function upload_audio(e, file=false) {
                     let newNorm = bassArr.map(val=>normalize(val, threshold2))
                     let threshold1 = newNorm.reduce((acc,crr)=>acc+crr/bassArr.length,0)
                     let bounce =threshold1 * 0.01
-                    console.log(bounce, threshold1,)
                     let bounced =defaultState.radius + bounce*defaultState.bounceMultiplier
                     let height =bounced*2>window.innerHeight ?window.innerHeight/2:bounced
                     let width =bounced*2>window.innerWidth ?window.innerWidth/2:bounced
@@ -332,7 +331,6 @@ function setShowParticles(event){
     let val = event.target.value === 'true'
     defaultState.showParticles = val
     config.showParticles = val
-    console.log('changed', defaultState, config, val)
 }
 
 //utility
@@ -426,7 +424,6 @@ function getWavBytes(buffer, options) {
   }
   window.addEventListener('resize', () => {
     if (worker) {
-        console.log('resize')
         let height = defaultState.radius*2>window.innerHeight ?window.innerHeight/2: defaultState.radius
         let width = defaultState.radius*2>window.innerWidth ?window.innerWidth/2: defaultState.radius
         config.radius = Math.min(height,width)

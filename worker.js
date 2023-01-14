@@ -87,12 +87,53 @@ const drawLine = (opts, ctx) => {
         ctx.lineTo(canvas.width,0)
         ctx.fill()
       }
+    break; case 4:
+      ctx.fillRect(i * width, centerY - height, width, height * 2)
+    break; case 5:
+      let color = ctx.fillStyle.slice(1)
+      ctx.fillStyle = `rgba(${parseInt(color.slice(0,2),16)},${parseInt(color.slice(2,4),16)},${parseInt(color.slice(4,6),16)},${height / 64})`
+      ctx.fillRect(i * width, 0, width, canvas.height)
+    break; case 6:
+      ctx.beginPath()
+      ctx.arc((Math.sin(rads * i) * radius * 1.5) + centerX,(Math.cos(rads * i) * radius * 1.5)+centerY,height / 2,0,Math.PI * 2)
+      ctx.fill()
+    break; case 7:
+      ctx.beginPath()
+      ctx.arc(endX,endY,5,0,10)
+      ctx.fill()
+    break; case 8:
+      for (let j = 1; j < 6; j++) {
+        ctx.beginPath()
+        ctx.arc(
+          centerX + (Math.sin(rads * i) * (height + radius) * (j / 3)),
+          centerY + (Math.cos(rads * i) * (height + radius) * (j / 3)),
+          5,
+          0,
+          10
+        )
+        ctx.fill()
+      }
+    break; case 9:
+      ctx.beginPath()
+      ctx.arc(i * width,centerY,height,0,10)
+      ctx.fill()
+    break; case 10:
+      ctx.beginPath()
+      ctx.moveTo(
+        centerX + Math.cos(rads * i) * (radius - height),
+        centerY + Math.sin(rads * i) * (radius - height)
+      )
+      ctx.lineTo(
+        centerX + Math.cos(rads * i) * (radius + height),
+        centerY + Math.sin(rads * i) * (radius + height)
+      )
+      ctx.stroke()
     break; default:
       ctx.beginPath();
       ctx.moveTo(x, y);
       ctx.lineTo(endX, endY);
       ctx.stroke();
-  }
+    }
 
 };
 const drawStars = ({ bufferLength, dataArray, config })=>{
