@@ -86,22 +86,25 @@ function upload_audio(e, file=false) {
                     let threshold2 = min+ (max-min)*0.7
                     let newNorm = bassArr.map(val=>normalize(val, threshold2))
                     let threshold1 = newNorm.reduce((acc,crr)=>acc+crr/bassArr.length,0)
-                    let bounce =threshold1 * 0.01
-                    let bounced =defaultState.radius + bounce*defaultState.bounceMultiplier
+                    let bounce = threshold1 * 0.01
+                    let bounced =defaultState.radius + Math.floor(bounce*defaultState.bounceMultiplier)
                     let height =bounced*2>window.innerHeight ?window.innerHeight/2:bounced
                     let width =bounced*2>window.innerWidth ?window.innerWidth/2:bounced
                     config.radius = Math.min(height,width)
                     config.bounce = bounce
+                    
+                }
+                const setLogo = ()=>{
                     let logoExists = container.querySelector('.logo_img')
                     if(logoExists) {
-
                         logoExists.height = config.radius *2
-                        logoExists.width = config.radius*2
+                        logoExists.width = config.radius *2
                     }
                 }
                 setBounce()
-            worker.postMessage({ bufferLength, dataArray, config }, {});
-            requestAnimationFrame(animate); // calls the animate function again. This method is built in
+                worker.postMessage({ bufferLength, dataArray, config }, {});
+                setTimeout(setLogo,200)
+                requestAnimationFrame(animate); // calls the animate function again. This method is built in
             }
             animate();
            
@@ -137,20 +140,24 @@ function upload_audio(e, file=false) {
                 const setBounce = ()=>{
                     let max = Math.max(...dataArray.slice(0,config.bufferLength/2))
                     let bounce =normalize1(max,255,0);
-                    let bounced =defaultState.radius + bounce*defaultState.bounceMultiplier
+                    let bounced =defaultState.radius + Math.floor(bounce*defaultState.bounceMultiplier)
                     let height =bounced*2>window.innerHeight ?window.innerHeight/2:bounced
                     let width =bounced*2>window.innerWidth ?window.innerWidth/2:bounced
                     config.radius = Math.min(height,width)
                     config.bounce = bounce
+                }
+                console.log(config.radius)
+                const setLogo = ()=>{
+
                     let logoExists = container.querySelector('.logo_img')
                     if(logoExists) {
-
                         logoExists.height = config.radius *2
-                        logoExists.width = config.radius*2
+                        logoExists.width = config.radius *2
                     }
                 }
                 setBounce()
                 worker.postMessage({ bufferLength, dataArray, config }, {});
+                setTimeout(setLogo,250)
                 requestAnimationFrame(animate); // calls the animate function again. This method is built in
                 }
     
@@ -170,6 +177,10 @@ document.getElementById('upload_bg').addEventListener('change', function(e) {
     reader.onload = function(evt) {
         url = evt.target.result;
         if(file.type.startsWith('image')){
+            let videoExists = container.querySelector('video')
+            if(videoExists){
+                container.removeChild(videoExists)
+            }
             container.style = `background-image: url(${url}); background-repeat:no-repeat;background-size:contain;background-position:center;`
         } else {
             let videoBlob = new Blob([new Uint8Array(url)], { type: file.type });// The blob gives us a URL to the video file:

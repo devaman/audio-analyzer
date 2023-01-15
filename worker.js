@@ -32,7 +32,7 @@ const drawVisualizer = ({ bufferLength, dataArray, config }) => {
   // ctx.translate(canvas.width / 2, canvas.height / 2)
   for (var i = 0; i < bufferLength; i++) {
       // const height =normalize(dataArray[i],100,0)
-      const height = config.beatDetection ? normalize(dataArray[i], threshold):(dataArray[i] *0.4)
+      const height = config.beatDetection ? normalize(dataArray[i], threshold)*(radius/130):(dataArray[i] *0.4)*(radius/130)
       // -i>0?(dataArray[i] *0.4)-i:(dataArray[i] *0.4)
 
       drawLine(
