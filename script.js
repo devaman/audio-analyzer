@@ -18,7 +18,7 @@ var defaultState= {
     bufferLength: 128,
     fftSize: 2**14,
     bounceMultiplier: 300,
-    beatDetection: false,
+    beatDetection: true,
     bounce: 0
 }
 if (!navigator.getUserMedia)
