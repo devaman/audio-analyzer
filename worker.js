@@ -30,16 +30,25 @@ const drawVisualizer = ({ bufferLength, dataArray, config }) => {
   let radius =config.radius
   // ctx.translate(250, 250)
   // ctx.translate(canvas.width / 2, canvas.height / 2)
-  for (var i = 0; i < bufferLength; i++) {
+  const heightsArr =  dataArray.map(el=>{
+    if(config.beatDetection) return normalize(el, threshold)*(radius/100)
+    else return (el *0.4)*(radius/100)
+  })
+  for(let j=0;j<heightsArr.length;j++){
+    if(j===heightsArr.length-3) heightsArr[j] = (heightsArr[j]+heightsArr[j+1]+heightsArr[j+2]+heightsArr[0]) /4
+    if(j===heightsArr.length-2) heightsArr[j] = (heightsArr[j]+heightsArr[j+1]+heightsArr[0]+heightsArr[1]) /4
+    else if(j===heightsArr.length-1) heightsArr[j] = (heightsArr[j]+heightsArr[0]+heightsArr[1]+heightsArr[2]) /4
+    else heightsArr[j] = (heightsArr[j]+heightsArr[j+1]+heightsArr[j+2]+heightsArr[j+3]) /4
+  }
+  for (let i = 0; i < bufferLength; i++) {
       // const height =normalize(dataArray[i],100,0)
-      const height = config.beatDetection ? normalize(dataArray[i], threshold)*(radius/130):(dataArray[i] *0.4)*(radius/130)
       // -i>0?(dataArray[i] *0.4)-i:(dataArray[i] *0.4)
-
+      
       drawLine(
         {
           i,
           bufferLength,
-          height,
+          heightsArr,
           radius,
           config
         },
@@ -48,7 +57,8 @@ const drawVisualizer = ({ bufferLength, dataArray, config }) => {
     }
 };
 const drawLine = (opts, ctx) => {
-  const { i, radius, bufferLength, height, config } = opts;
+  const { i, radius, bufferLength, heightsArr, config } = opts;
+  const height = heightsArr[i]
   const centerX = canvas.width / 2;
   const centerY = canvas.height / 2;
   const lineWidth = 2 * Math.PI * radius / bufferLength;
