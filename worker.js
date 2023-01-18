@@ -32,14 +32,11 @@ const drawVisualizer = ({ bufferLength, dataArray, config }) => {
   // ctx.translate(250, 250)
   // ctx.translate(canvas.width / 2, canvas.height / 2)
   const heightsArr =  dataArray.map(el=>{
-    if(config.beatDetection) return normalize(el, threshold)*(radius/100)
-    else return (el *0.4)*(radius/100)
+    if(config.beatDetection) return normalize(el, threshold)*(radius/80)
+    else return (el *0.4)*(radius/80)
   })
-  for(let j=0;j<heightsArr.length;j++){
-    if(j===heightsArr.length-3) heightsArr[j] = (heightsArr[j]+heightsArr[j+1]+heightsArr[j+2]+heightsArr[0]) /4
-    if(j===heightsArr.length-2) heightsArr[j] = (heightsArr[j]+heightsArr[j+1]+heightsArr[0]+heightsArr[1]) /4
-    else if(j===heightsArr.length-1) heightsArr[j] = (heightsArr[j]+heightsArr[0]+heightsArr[1]+heightsArr[2]) /4
-    else heightsArr[j] = (heightsArr[j]+heightsArr[j+1]+heightsArr[j+2]+heightsArr[j+3]) /4
+  for(let j=1;j<=heightsArr.length;j++){
+    heightsArr[j] = (heightsArr[(j-1)%(heightsArr.length)]+heightsArr[j%(heightsArr.length)]+heightsArr[(j+1)%(heightsArr.length)]+heightsArr[(j+2)%(heightsArr.length)]) /4
   }
   for (let i = 0; i < bufferLength; i++) {
       // const height =normalize(dataArray[i],100,0)

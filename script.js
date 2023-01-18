@@ -16,10 +16,10 @@ var defaultState= {
     radius: 128,
     color: '#000000',
     showParticles: true,
-    displayType: 0,
+    displayType: 11,
     bufferLength: 128,
     fftSize: 2**14,
-    bounceMultiplier: 200,
+    bounceMultiplier: 250,
     beatDetection: true,
     bounce: 0
 }
