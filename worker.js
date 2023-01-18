@@ -17,6 +17,7 @@ const placeParticles = () => {
 // let color="#222"
 const normalize = (val, threshold=200) => ((val > threshold) ? val - threshold : 0);
 const normalize1 = (val, max, min) => ((val-min)/(max-min))
+const changeRange =(OldValue,NewRange, OldRange, OldMin, NewMin)=>((((OldValue - OldMin) * NewRange) / OldRange) + NewMin)
 const random = (min, max) => Math.floor(Math.random() * (max - min)) + min;
 const drawVisualizer = ({ bufferLength, dataArray, config }) => {
   // let radius = 128
@@ -63,11 +64,16 @@ const drawLine = (opts, ctx) => {
   const centerY = canvas.height / 2;
   const lineWidth = 2 * Math.PI * radius / bufferLength;
   const rads = (Math.PI * 2) / bufferLength;
+  
+  let rot = Math.ceil(changeRange(i,bufferLength, bufferLength , 0, -bufferLength/4))
+  const x = centerX + Math.cos(rads * rot) * (radius);
+  const y = centerY + Math.sin(rads * rot) * (radius);
+  const endX = centerX + Math.cos(rads * rot) * (radius + height);
+  const endY = centerY + Math.sin(rads * rot) * (radius + height);
 
-  const x = centerX + Math.cos(rads * i) * (radius);
-  const y = centerY + Math.sin(rads * i) * (radius);
-  const endX = centerX + Math.cos(rads * i) * (radius + height);
-  const endY = centerY + Math.sin(rads * i) * (radius + height);
+  // Mirror points
+  // rot = changeRange(i,bufferLength, bufferLength , 0, -bufferLength/2) 
+ 
   let width = canvas.width / bufferLength;
   ctx.strokeStyle = config.color;
   ctx.fillStyle = config.color
@@ -138,6 +144,41 @@ const drawLine = (opts, ctx) => {
         centerY + Math.sin(rads * i) * (radius + height)
       )
       ctx.stroke()
+      break; case 11:
+      if(i<=bufferLength/2) {
+        const negx = centerX - Math.cos(rads * rot) * (radius);
+        const negy = centerY + Math.sin(rads * rot) * (radius);
+        const negendX = centerX - Math.cos(rads * rot) * (radius + heightsArr[i]);
+        const negendY = centerY + Math.sin(rads * rot) * (radius + heightsArr[i]);
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(endX, endY);
+        ctx.moveTo(negx, negy);
+        ctx.lineTo(negendX, negendY);
+        ctx.stroke();
+      }
+      break; case 12:
+      const negendX = centerX + Math.cos(rads * rot) * (radius + heightsArr[bufferLength-i]);
+      const negendY = centerY + Math.sin(rads * rot) * (radius + heightsArr[bufferLength-i]);
+      if(i<=bufferLength/2) {
+        if (i == 0) {
+          ctx.beginPath()
+          ctx.moveTo(endX,endY)
+        }
+        ctx.lineTo(endX,endY)
+        if (i == bufferLength/2) {
+          ctx.moveTo(endX,endY)
+        }
+      } else {
+        ctx.lineTo(negendX,negendY)
+        if (i == bufferLength-1) {
+          rot = Math.ceil(changeRange(0,bufferLength, bufferLength , 0, -bufferLength/4))
+          const negendX = centerX + Math.cos(rads * rot) * (radius + heightsArr[0]);
+          const negendY = centerY + Math.sin(rads * rot) * (radius + heightsArr[0]);
+          ctx.lineTo(negendX,negendY)
+          ctx.fill()
+        }
+      }
     break; default:
       ctx.beginPath();
       ctx.moveTo(x, y);

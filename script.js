@@ -6,6 +6,8 @@ var canvas = document.getElementById("canvas").transferControlToOffscreen();
 var audioEl = document.getElementById('audio') 
 var container = document.getElementById('container')
 var local_stream= null
+var source = null
+var audioCtx = null
 const normalize = (val, threshold=200) => ((val > threshold) ? val - threshold : 0);
 const normalize1 = (val, max, min) => ((val-min)/(max-min))
 canvas.width = window.innerWidth
@@ -17,7 +19,7 @@ var defaultState= {
     displayType: 0,
     bufferLength: 128,
     fftSize: 2**14,
-    bounceMultiplier: 300,
+    bounceMultiplier: 200,
     beatDetection: true,
     bounce: 0
 }
@@ -33,7 +35,9 @@ function upload_audio(e, file=false) {
         if(local_stream) local_stream.getAudioTracks()[0].enabled = false;
         reader.onload = async function(evt) {
             url = evt.target.result;
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)(); // for safari browser // I need to explain the browser restrictions & CORS issues here
+            if(!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)(); // for safari browser // I need to explain the browser restrictions & CORS issues here
+            }
             // let origblob = new Blob(, { type: file.type });// The blob gives us a URL to the video file:
             // var arrayBuffer = await new Response(origblob).arrayBuffer();
             let audioBuffer = await audioCtx.decodeAudioData(url);
@@ -56,20 +60,21 @@ function upload_audio(e, file=false) {
             // var gainNode = audioCtx.createGain()
             let lowpass = audioCtx.createBiquadFilter()
             let highpass = audioCtx.createBiquadFilter()
-    
-            let source = audioCtx.createMediaElementSource(audioEl)
-            source.connect(lowpass)
-            lowpass.connect(highpass)
+            if(!source){
+                source = audioCtx.createMediaElementSource(audioEl)
+            }
+            analyser = audioCtx.createAnalyser();
+            source.connect(analyser)
+            // lowpass.connect(highpass)
             source.connect(audioCtx.destination)
             
-            lowpass.type = "lowpass"
-            lowpass.frequency.value = 200
-            lowpass.gain.value = -1
-            highpass.type = "highpass"
-            highpass.frequency.value = 10
-            highpass.gain.value = -1
-            analyser = audioCtx.createAnalyser();
-            highpass.connect(analyser)
+            // lowpass.type = "lowpass"
+            // lowpass.frequency.value = 200
+            // lowpass.gain.value = -1
+            // highpass.type = "highpass"
+            // highpass.frequency.value = 10
+            // highpass.gain.value = -1
+            // highpass.connect(analyser)
            
             analyser.fftSize = defaultState.fftSize // controls the size of the FFT. The FFT is a fast fourier transform. Basically the number of sound samples. Will be used to draw bars in the canvas
     
