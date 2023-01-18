@@ -29,6 +29,7 @@ navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia 
 
 var config= {...defaultState}
 function upload_audio(e, file=false) {
+    config = {...defaultState}
     if(file) {
         var file = e.target.files[0]
         var reader = new FileReader();
@@ -58,8 +59,6 @@ function upload_audio(e, file=false) {
             filter.frequency.value = 400;
     
             // var gainNode = audioCtx.createGain()
-            let lowpass = audioCtx.createBiquadFilter()
-            let highpass = audioCtx.createBiquadFilter()
             if(!source){
                 source = audioCtx.createMediaElementSource(audioEl)
             }
@@ -108,7 +107,7 @@ function upload_audio(e, file=false) {
                 }
                 setBounce()
                 worker.postMessage({ bufferLength, dataArray, config }, {});
-                setTimeout(setLogo,200)
+                setTimeout(setLogo,500)
                 requestAnimationFrame(animate); // calls the animate function again. This method is built in
             }
             animate();
@@ -151,7 +150,6 @@ function upload_audio(e, file=false) {
                     config.radius = Math.min(height,width)
                     config.bounce = bounce
                 }
-                console.log(config.radius)
                 const setLogo = ()=>{
 
                     let logoExists = container.querySelector('.logo_img')
@@ -325,8 +323,8 @@ function radiusChange(event){
 }
 function setFFTSize(event){
     let val = event.target.value
-    defaultState.fftSize = parseInt(val)
-    config.fftSize = parseInt(val)
+    defaultState.fftSize = Math.pow(2,parseInt(val))
+    config.fftSize = Math.pow(2,parseInt(val))
 }
 function setBufferLength(event){
     let val = event.target.value

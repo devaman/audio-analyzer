@@ -3,6 +3,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <link rel="stylesheet" href="style.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
     <script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-99907893-3"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -25,78 +26,93 @@
           <span id="fullscreen"><img src="/img/fullscreen.png" height="30" width="30"/></span>
         </div>
       </div>
-    <div class="config">
+    <div class="config container">
         <h1>Configure the Audio Board</h1>
-        <div>
-            <label for="upload_audio">Upload audio / video</label>
-            <input id="upload_audio" onchange="upload_audio(event,true);" type="file"/>
-            OR
-            <button onclick="upload_audio(event);">Mic Audio</button>
+        <div class="row align-items-center">
+          <div class="col-6">
+            <label  for="upload_audio" class="form-label">Upload audio / video</label>
+            <input class="form-control" id="upload_audio" accept=".mp3,.mp4" onchange="upload_audio(event,true);" type="file">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Or Select Audio</label>
+            <button class="btn btn-outline-primary" onclick="upload_audio(event);">Mic Audio</button>
+          </div>
+          
+            
         </div>
         <div>
-            <label for="upload_bg">Upload background Image/ video</label>
-            <input type="file" id="upload_bg" placeholder="bg"/>
+            <label for="upload_bg"  class="form-label">Upload background Image/ video</label>
+            <input class="form-control" accept=".jpg,.png,.jpeg,.gif,.mp4" type="file" id="upload_bg" placeholder="bg"/>
         </div>
         <div>
-          <label for="upload_logo">Upload logo</label>
-          <input type="file" id="upload_logo" placeholder="logo"/>
+          <label for="upload_logo" class="form-label">Upload logo</label>
+          <input class="form-control" accept=".jpg,.png,.jpeg,.gif" type="file" id="upload_logo" placeholder="logo"/>
         </div>
         <div>
           <label for="stroke_color">Select stroke color</label>
           <input type="color" id="stroke_color" value="#000000">
         </div>
         <div>
-          <label for="stroke_color">Radius</label>
-          <input type="number" value="128" onchange="radiusChange(event);">
+          <label for="stroke_color" class="form-label">Radius</label>
+          <input type="range" class="form-range" min="0" max="500" value="128" onchange="radiusChange(event);">
         </div>
-        <div>
-          <label for="stroke_color">Display Template</label>
-          <select onchange="displayChange(event);">
-            <option  value="0">Radial Lines</option>
-            <option value="1">Radial Smooth</option>
-            <option selected="selected" value="11">Mirror Radial Line</option>
-            <option value="12">Mirror Radial Smooth</option>
-            <option value="6">Radial Blob</option>
-            <option value="7">Radial Dots</option>
-            <option value="8">Radial Dots (Multiple)</option>
-            <option value="2">Top Lines</option>
-            <option value="3">Top Smooth</option>
-            <option value="4">Sound Wave</option>
-            <option value="5">Darken</option>
-            <option value="9">Horizontal Blob</option>
-            <option value="10">Double Sided Lines</option>
+        <div class="row">
+          <div class="col-6">
+            <label for="stroke_color">Display Template</label>
+            <select class="form-select" onchange="displayChange(event);">
+              <option  value="0">Radial Lines</option>
+              <option value="1">Radial Smooth</option>
+              <option selected="selected" value="11">Mirror Radial Line</option>
+              <option value="12">Mirror Radial Smooth</option>
+              <option value="6">Radial Blob</option>
+              <option value="7">Radial Dots</option>
+              <option value="8">Radial Dots (Multiple)</option>
+              <option value="2">Top Lines</option>
+              <option value="3">Top Smooth</option>
+              <option value="4">Sound Wave</option>
+              <option value="5">Darken</option>
+              <option value="9">Horizontal Blob</option>
+              <option value="10">Double Sided Lines</option>
+  
+            </select>
+          </div>
+         
+        </div>
+        <div class="row">
+          <div class="col-6">
 
-          </select>
+            <label for="stroke_color" class="form-label">Beat Detection</label>
+            <select class="form-select" onchange="setBeatDetection(event);">
+              <option value="false">False</option>
+              <option selected="selected" value="true">True</option>
+            </select>
+          </div>
         </div>
         <div>
-          <label for="stroke_color">Beat Detection</label>
-          <select onchange="setBeatDetection(event);">
-            <option value="false">False</option>
-            <option selected="selected" value="true">True</option>
-          </select>
+          <label for="stroke_color" class="form-label">Bounce Multiplier (1-100)</label>
+          <input type="range" class="form-range" min="1" max="500"value="250" onchange="setBounceMultiplier(event);">
         </div>
-        <div>
-          <label for="stroke_color">Bounce Multiplier (1-100)</label>
-          <input type="number" value="250" onchange="setBounceMultiplier(event);">
-        </div>
-        <div>
-          <label for="stroke_color">Show Particles</label>
-          <select onchange="setShowParticles(event);">
-            <option selected="selected" value="true">True</option>
-            <option value="false">False</option>
-          </select>
+        <div class="row">
+          <div class="col-6">
+            <label for="stroke_color" class="form-label">Show Particles</label>
+            <select class="form-select" onchange="setShowParticles(event);">
+              <option selected="selected" value="true">True</option>
+              <option value="false">False</option>
+            </select>
+          </div>
+
         </div>
         <br>
         <h3>Below config will be set after re-uploading of audio</h3>
         <div>
-          <label for="stroke_color">FFT size( power of 2 (between 2^5-2^15))</label>
-          <input type="number" value="16384" onchange="setFFTSize(event);">
+          <label for="stroke_color" class="form-label">FFT size( power of 2 (between 2^5-2^15))</label>
+          <input type="range" class="form-range" min="5" max="15" value="14" onchange="setFFTSize(event);">
         </div>
         <div>
-          <label for="stroke_color">BufferLength(min than fftsize)</label>
+          <label for="stroke_color" class="form-label">BufferLength(min than fftsize)</label>
           <input type="number" value="128" onchange="setBufferLength(event);">
         </div>
     </div>
-     
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script> 
     <script src="script.js"></script>
   </body>
